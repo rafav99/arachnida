@@ -66,26 +66,32 @@ def get_images(url, soup, depth):
    
 def get_links(url, depth):
 	depth -= 1
-	response = requests.get(url, timeout=5)
-	soup = BeautifulSoup(response.content, "html.parser")
-	a_item  = soup.find_all("a")
-	link_url_list = []
-	for a in a_item:
-		if "href" in a.attrs:
-			link_url = a["href"]
-			link_url = urllib.parse.urljoin(url, link_url)
-			if web_name in link_url and link_url not in absol_list:
-				if link_url.split(".")[-1] not in unwanted_extensions:
-					link_url_list.append(link_url)
-					absol_list.append(link_url)
-	if depth > 0:
-		for link in link_url_list:
-			get_links(link, depth)
-	get_images(url, soup, depth)
+	try:
+		response = requests.get(url, timeout=5)
+		soup = BeautifulSoup(response.content, "html.parser")
+		a_item  = soup.find_all("a")
+		link_url_list = []
+		for a in a_item:
+			if "href" in a.attrs:
+				link_url = a["href"]
+				link_url = urllib.parse.urljoin(url, link_url)
+				if web_name in link_url and link_url not in absol_list:
+					if link_url.split(".")[-1] not in unwanted_extensions:
+						link_url_list.append(link_url)
+						absol_list.append(link_url)
+		if depth > 0:
+			for link in link_url_list:
+				get_links(link, depth)
+		get_images(url, soup, depth)
+	except:
+		print("could not enter link")
 
 img_extensions = [".jpg", ".png", ".bmp", ".gif", ".jpeg"]
 unwanted_extensions = ["pdf", "zip", "doc", "xls", "png", "jpg", "jpeg", "gif", "mp3", "mp4", "avi", "csv", "exe", "rar", "tar", "gz", "ppt", "pptx", "xlsx", "docx"]
-web_name = url.split("/")[2]
+try:
+	web_name = url.split("/")[2]
+except:
+	print("Wrong format")
 absol_list = [url]
 absol_img_list = []
 get_links(url, depth)
